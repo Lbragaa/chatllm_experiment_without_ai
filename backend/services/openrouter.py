@@ -20,8 +20,18 @@ _SYSTEM_PROMPT = (
 )
 
 
-def _build_messages(*, user_message: str, history: list[dict]) -> list[dict]:
-    messages: list[dict] = [{"role": "system", "content": _SYSTEM_PROMPT}]
+def _build_messages(
+    *,
+    user_message: str,
+    history: list[dict],
+    custom_instructions: str | None = None,
+) -> list[dict]:
+    # se nao tiver instrucao personalizada, continua usando o prompt antigo
+    system_prompt = _SYSTEM_PROMPT
+    if custom_instructions and custom_instructions.strip():
+        system_prompt = custom_instructions.strip()
+
+    messages: list[dict] = [{"role": "system", "content": system_prompt}]
     for item in history:
         role = item.get("role")
         content = item.get("content")
@@ -41,14 +51,24 @@ def _build_headers() -> dict[str, str]:
     }
 
 
-async def generate_reply(*, user_message: str, history: list[dict], model: str | None = None) -> tuple[str, str]:
+async def generate_reply(
+    *,
+    user_message: str,
+    history: list[dict],
+    model: str | None = None,
+    custom_instructions: str | None = None,
+) -> tuple[str, str]:
     if not OPENROUTER_API_KEY:
         raise OpenRouterConfigError(
             "OPENROUTER_API_KEY nao definido. Configure em .env ou environment variables."
         )
 
     resolved_model = model or OPENROUTER_MODEL_DEFAULT
-    messages = _build_messages(user_message=user_message, history=history)
+    messages = _build_messages(
+        user_message=user_message,
+        history=history,
+        custom_instructions=custom_instructions,
+    )
 
     payload = {
         "model": resolved_model,
@@ -71,7 +91,13 @@ async def generate_reply(*, user_message: str, history: list[dict], model: str |
     return reply, resolved_model
 
 
-async def stream_reply(*, user_message: str, history: list[dict], model: str | None = None):
+async def stream_reply(
+    *,
+    user_message: str,
+    history: list[dict],
+    model: str | None = None,
+    custom_instructions: str | None = None,
+):
     if not OPENROUTER_API_KEY:
         raise OpenRouterConfigError(
             "OPENROUTER_API_KEY nao definido. Configure em .env ou environment variables."
@@ -80,7 +106,11 @@ async def stream_reply(*, user_message: str, history: list[dict], model: str | N
     resolved_model = model or OPENROUTER_MODEL_DEFAULT
     payload = {
         "model": resolved_model,
-        "messages": _build_messages(user_message=user_message, history=history),
+        "messages": _build_messages(
+            user_message=user_message,
+            history=history,
+            custom_instructions=custom_instructions,
+        ),
         "stream": True,
     }
 

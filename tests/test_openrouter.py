@@ -23,6 +23,14 @@ class TestBuildMessages:
         assert messages[1]["role"] == "user"
         assert messages[1]["content"] == "Ola"
 
+    def test_build_messages_with_custom_instructions(self):
+        messages = _build_messages(
+            user_message="Ola",
+            history=[],
+            custom_instructions="  Responda como um pirata.  ",
+        )
+        assert messages[0]["content"] == "Responda como um pirata."
+
     def test_build_messages_with_history(self):
         """Deve incluir historico entre system prompt e mensagem do usuario."""
         history = [

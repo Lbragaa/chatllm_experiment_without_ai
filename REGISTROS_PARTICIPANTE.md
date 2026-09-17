@@ -1,31 +1,53 @@
-# Registros do Participante
+# Meu registro
 
-Este arquivo é um espaço opcional e de uso livre durante a atividade.
+O projeto usa FastAPI no backend, React no frontend e SQLite para salvar os dados.
 
-Você pode utilizá-lo da forma que considerar mais útil para o seu trabalho. Por exemplo, ele pode servir como:
+O `models.py` tem as tabelas do banco e o `auth.py` cuida do login. As rotas ficam dentro da pasta `routers`. O `openrouter.py` manda as mensagens para a IA. No frontend, a tela do chat fica no `App.jsx` e a comunicação com o backend fica no `api.js`.
 
-documentação própria da solução;
+O prompt da IA está fixo no `openrouter.py` e é igual para todo usuário.
 
-- anotações;
+Meu plano:
 
-- refatorações;
+- adicionar as instruções no usuário do banco;
+- criar uma rota para buscar e salvar elas;
+- usar as instruções do usuário nas respostas da IA;
+- fazer uma parte da tela para editar e salvar;
+- testar se o texto fica salvo e se cada usuário só acessa as próprias instruções.
 
-- rascunhos;
+Meu rascunho do armazenamento:
 
-- observações;
+```text
+ir no models.py
 
-- lembretes;
+na classe User:
+    colocar custom_instructions como campo de texto
+    deixar esse campo aceitar NULL
 
-- listas ou checklists;
+se estiver NULL:
+    usar o prompt padrão que já existe
+senão:
+    usar o texto salvo pelo usuário
+```
 
-- referências;
+Também precisa atualizar o banco que já existe. Só colocar o campo no `models.py` não cria a coluna dentro do SQLite antigo.
 
-qualquer outro registro que você considere útil durante a implementação.
+Mais ou menos assim:
 
-Não existe um formato esperado, nem é necessário preencher este arquivo para concluir a atividade.
+```sql
+ALTER TABLE users ADD COLUMN custom_instructions TEXT;
+```
 
-Caso utilize este espaço, organize o conteúdo da maneira que preferir.
+Antes disso, conferir se a coluna já existe para não tentar criar duas vezes e manter os dados que já estão salvos.
 
----
+No `openrouter.py` tem a função `_build_messages()`. Ela monta a lista de mensagens que vai para a IA e coloca o `_SYSTEM_PROMPT` logo no começo.
 
-Registros
+Agora falta deixar essa função receber as instruções personalizadas também:
+
+```text
+se receber custom_instructions:
+    usar esse texto como system prompt
+senão:
+    continuar usando o _SYSTEM_PROMPT normal
+```
+
+Depois, mudar o `generate_reply()` e o `stream_reply()` para receber esse valor e passar para o `_build_messages()`. Por enquanto dá para preparar essa parte no OpenRouter e ligar com o usuário depois.
