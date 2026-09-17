@@ -14,6 +14,10 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
+  const [customInstructions, setCustomInstructions] = useState(
+    localStorage.getItem("custom_instructions") || ""
+  );
   const messagesRef = useRef(null);
   const abortControllerRef = useRef(null);
 
@@ -151,6 +155,11 @@ function App() {
     setError("");
   };
 
+  // salvamento temporario no navegador, depois isso vai para o backend
+  const handleSaveInstructions = () => {
+    localStorage.setItem("custom_instructions", customInstructions);
+  };
+
   const onStop = () => {
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
@@ -269,9 +278,30 @@ function App() {
           </div>
           <div className="header-right">
             <span className="user-email">{userEmail}</span>
+            <button
+              className="logout-btn"
+              onClick={() => setInstructionsOpen(!instructionsOpen)}
+            >
+              Instrucoes
+            </button>
             <button className="logout-btn" onClick={handleLogout}>Sair</button>
           </div>
         </header>
+
+        {instructionsOpen && (
+          <div style={{ padding: "10px 20px" }}>
+            <p>Instrucoes personalizadas</p>
+            <textarea
+              id="custom-instructions"
+              value={customInstructions}
+              onChange={(event) => setCustomInstructions(event.target.value)}
+              placeholder="Ex: responda de forma curta e simples"
+              rows="4"
+              style={{ width: "100%" }}
+            />
+            <button onClick={handleSaveInstructions}>Salvar</button>
+          </div>
+        )}
 
         <section className="messages" aria-live="polite" ref={messagesRef}>
           <div className="messages-inner">

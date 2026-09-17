@@ -51,3 +51,4 @@ senão:
 ```
 
 Depois, mudar o `generate_reply()` e o `stream_reply()` para receber esse valor e passar para o `_build_messages()`. Por enquanto dá para preparar essa parte no OpenRouter e ligar com o usuário depois.
+
